@@ -20,7 +20,7 @@ module tt_um_algofoogle_solo_squash(
 );
 
     // Hard-wire bidir IOs to just be inputs:
-    assign ui_oe = 8'b0;
+    assign uio_oe = 8'b0;
 
     // For test purposes, use unused outputs to loop back a couple of things:
     assign uo_out[6] = clk;

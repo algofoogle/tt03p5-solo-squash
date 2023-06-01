@@ -20,7 +20,7 @@ module tt_um_algofoogle_solo_squash(
     assign ui_oe = 8'b0;
 
     // For test purposes, use unused outputs to loop back a couple of things:
-    assign ui_out[5] = 0; //SMELL: Speaker is disabled for now because of a Yosys complaint.
+    // assign ui_out[5] = 0;
     assign ui_out[6] = clk;
     assign ui_out[7] = ~ui_in[4]; // Unused input, just inverted for testing.
 
@@ -40,7 +40,7 @@ module tt_um_algofoogle_solo_squash(
         .blue       (ui_out[2]),
         .hsync      (ui_out[3]),
         .vsync      (ui_out[4]),
-        // .speaker    (ui_out[5]) //SMELL: Speaker is disabled for now because of a Yosys complaint.
+        .speaker    (ui_out[5])
     );
 
 endmodule

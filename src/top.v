@@ -20,7 +20,8 @@ module tt_um_algofoogle_solo_squash(
     assign ui_oe = 8'b0;
 
     // For test purposes, use unused outputs to loop back a couple of things:
-    assign ui_out[6] = 
+    assign ui_out[6] = clk;
+    assign ui_out[7] = ~ui_in[4]; // Unused input, just inverted for testing.
 
     solo_squash solo_squash(
         // --- Inputs ---

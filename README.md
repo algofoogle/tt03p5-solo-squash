@@ -2,6 +2,20 @@
 
 > Note: this is an experimental template for Tiny Tapeout 03p5 (3.5). Please talk to us before using it!
 
+# "Solo Squash" TT03p5 submission
+
+This is a minimalistic VGA "game" implemented in Verilog as a single "tile" submission to the experimental
+Tiny Tapeout 03p5 Caravel project, destined to be made into an ASIC via the chipIgnite 2306Q shuttle.
+
+The design itself is digital logic that implements a 640x480 VGA driver that allows one person to play
+a super simple Pong-like game of bouncing a ball off a paddle and around 3 walls.
+
+A much more detailed run-down of the design is found in the [`solo_squash` repo](https://github.com/algofoogle/solo_squash).
+
+For more info about my previous Tiny Tapeout submission attempt, including a discussion of a bit of the
+testing and local build process, see: [`anton1-tt03`](https://github.com/algofoogle/anton1-tt03)
+
+
 # What is Tiny Tapeout?
 
 TinyTapeout is an educational project that aims to make it easier and cheaper than ever to get your digital designs manufactured on a real chip!

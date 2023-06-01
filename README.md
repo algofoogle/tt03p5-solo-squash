@@ -1,6 +1,9 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/wokwi_test/badge.svg)
 
-> Note: this is an experimental template for Tiny Tapeout 03p5 (3.5). Please talk to us before using it!
+> Note: this is an experimental repo for Tiny Tapeout 03p5 (3.5).
+> It is essentially a fork of the experimental template:
+> [tt03p5-submission-template](https://github.com/TinyTapeout/tt03p5-submission-template).
+> Please talk to the Tiny Tapeout team before using it!
 
 # "Solo Squash" TT03p5 submission
 

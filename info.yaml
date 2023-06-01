@@ -3,16 +3,16 @@
 project:
   wokwi_id:    0        # Not using Wokwi; otherwise, would be the Wokwi project ID
 
-# If using an HDL, set wokwi_id as 0 and uncomment and list your source files here. 
-# Source files must be in ./src and you must list each source file separately
-source_files:
-  - top.v                                   # This is my wrapper to connect the TT interface with my design.
-  - solo_squash/src/solo_squash.v           # My main design HDL is in a git submodule of the src/ dir.
-top_module:  "tt_um_algofoogle_solo_squash" # Top module name; must start with "tt_um_". Make it unique by prepending your github username
+  # If using an HDL, set wokwi_id as 0 and uncomment and list your source files here. 
+  # Source files must be in ./src and you must list each source file separately
+  source_files:
+    - top.v                                 # This is my wrapper to connect the TT interface with my design.
+    - solo_squash/src/solo_squash.v         # My main design HDL is in a git submodule of the src/ dir.
+  top_module: tt_um_algofoogle_solo_squash  # Top module name; must start with "tt_um_". Make it unique by prepending your github username
 
-# How many tiles your design occupies? A single tile is about 167x108 uM.
-# Before changing this, please reach out to us on discord to discuss your design.
-  tiles: "1x1"    # Valid values: 1x1, 1x2, 2x2, 4x2 or 8x2
+  # How many tiles your design occupies? A single tile is about 167x108 uM.
+  # Before changing this, please reach out to us on discord to discuss your design.
+  tiles: 1x1    # Valid values: 1x1, 1x2, 2x2, 4x2 or 8x2
 
 # Keep a track of the submission yaml
 yaml_version: 3.5
@@ -22,10 +22,10 @@ yaml_version: 3.5
 #
 # Here is a great example: https://github.com/davidsiaw/tt02-davidsiaw-stackcalc/blob/38c5647f83aad2aec675d566aa3d67b98f0aac81/info.yaml
 documentation: 
-  author:       "Anton Maurovic (algofoogle)"
-  title:        "Solo Squash VGA game"
-  language:     "Verilog"
-  description:  "VGA display driver that implements a minimal Pong-like game for 1 player"
+  author:       Anton Maurovic (algofoogle)
+  title:        Solo Squash VGA game
+  language:     Verilog
+  description:  VGA display driver that implements a minimal Pong-like game for 1 player
 
 # Longer description of how the project works. You can use standard markdown format.
   how_it_works: |
@@ -67,9 +67,9 @@ documentation:
     - none        # Unused.
 
 # The following fields are optional
-  tag:          "vga, game"      # comma separated list of tags: test encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,
+  tag:          vga, game      # comma separated list of tags: test encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,
   external_hw:  "270R resistors on each of red, green, blue to VGA cable; buttons with pull-ups for up/down; speaker driver; optional buttons for pause/new game"      # Describe any external hardware needed
-  discord:      "algofoogle#4505"      # Your discord handle, used for communication and automatically assigning tapeout role after a submission
-  doc_link:     "https://github.com/algofoogle"      # URL to longer form documentation, eg the README.md in your repository
+  discord:      algofoogle#4505      # Your discord handle, used for communication and automatically assigning tapeout role after a submission
+  doc_link:     https://github.com/algofoogle      # URL to longer form documentation, eg the README.md in your repository
   clock_hz:     25000000       # Clock frequency in Hz (if required)
-  picture:      "src/solo_squash/doc/verilator.png"      # relative path to a picture in your repository
+  picture:      src/solo_squash/doc/verilator.png      # relative path to a picture in your repository

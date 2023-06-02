@@ -91,6 +91,10 @@ documentation:
     two full lines rendered hopefully yellow (i.e. `red` and `green` channels both asserted,
     but not `blue`).
 
+    Note also, for other testing: The upper 2 bits of the bidirectional IO will output the
+    unregistered red and green signals; and the upper 2 bits of the dedicated output pins will
+    output the `col==0` and `row==0` signals.
+
     ### Bonus: Leading Zero Counter experiment
 
     There is an extra feature in this design which is just an experiment: I've included a
@@ -113,7 +117,7 @@ documentation:
     - new_game    # Reset game state.
     - down_key    # Move paddle down while asserted.
     - up_key      # Move paddle up while asserted.
-    - none        # Unused.
+    - extra_sel   # Select what the extra debug1&2 signals (top 2 bits of bidirectional port) are for.
     - none        # Unused.
     - none        # Unused.
     - none        # Unused.
@@ -125,8 +129,8 @@ documentation:
     - hsync       # VGA signal: horizontal sync pulse
     - vsync       # VGA signal: vertical sync pulse
     - speaker     # Speaker tone
-    - none        # Unused.
-    - none        # Unused.
+    - col0        # Unused.
+    - row0        # Unused.
 # A description of what the bidirectional I/O pins do:
   bidirectional:
     - lzc_out[0]  # Leading zero counter experiment; count bit 0
@@ -135,8 +139,8 @@ documentation:
     - lzc_out[3]  # Leading zero counter experiment; count bit 3
     - lzc_out[4]  # Leading zero counter experiment; count bit 4
     - lzc_all     # Leading zero counter experiment; asserted if lzc_out==24
-    - none        # Unused.
-    - none        # Unused.
+    - debug1      # UNregistered (direct) green signal.
+    - debug2      # UNregistered (direct) red signal.
 
 # The following fields are optional
   tag:          vga, game      # comma separated list of tags: test encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,

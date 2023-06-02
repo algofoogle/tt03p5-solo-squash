@@ -27,10 +27,15 @@ module tt_um_algofoogle_solo_squash(
     //NOTE: MAYBE we should also care about registering hsync, vsync, and maybe speaker,
     // but I want to see what happens in the real ASIC if we don't.
 
-    // Hard-wire bidir IOs to make upper 2 bits inputs, and the rest outputs (driven by LZC):
-    assign uio_oe = 8'b00_111111;
-    // Unused, but avoids some synthesis warnings:
-    assign uio_out[7:6] = 2'b00;
+    // Hard-wire bidir IOs to make them all outputs:
+    assign uio_oe = 8'b11111111;
+    // For other experimentation, output the UNregistered (direct combo logic)
+    // red and green signals directly out via the upper 2 bits of the bidir IO port,
+    // unless switched by pulling ui_in[4] high, in which case red and green are
+    // replaced with blue and the 'visible' signal:
+    assign uio_out[7] = ui_in[4] ? b : r;
+    assign uio_out[6] = ui_in[4] ? visible : g;
+    wire visible;
 
     // Input metastability avoidance. Do we really need this, for this design?
     // I'm playing it extra safe :)
@@ -70,7 +75,8 @@ module tt_um_algofoogle_solo_squash(
         .row0       (uo_out[7]),
         .h_out      (h),
         .v_out      (v),
-        .offset_out (offset)
+        .offset_out (offset),
+        .visible_out(visible)
     );
 
 endmodule

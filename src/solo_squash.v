@@ -69,7 +69,8 @@ module solo_squash #(
   output  wire  row0,
   output  wire [9:0] h_out,
   output  wire [9:0] v_out,
-  output  wire [4:0] offset_out
+  output  wire [4:0] offset_out,
+  output  wire  visible_out
 
 
 );
@@ -88,6 +89,7 @@ module solo_squash #(
   assign h_out = h;
   assign v_out = v;
   assign offset_out = offset;
+  assign visible_out = visible;
 
 `ifdef CARAVEL_IO_OEB //NOTE: Probably won't be used anymore; handled by solo_squash_caravel adapter instead.
 `ifdef RESET_AL

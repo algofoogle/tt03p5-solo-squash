@@ -7,7 +7,7 @@ project:
   # Source files must be in ./src and you must list each source file separately
   source_files:
     - top.v                                 # This is my wrapper to connect the TT interface with my design.
-    - solo_squash/src/solo_squash.v         # My main design HDL is in a git submodule of the src/ dir.
+    - solo_squash.v                         # My main design HDL is in a git submodule of the src/ dir.
   top_module: tt_um_algofoogle_solo_squash  # Top module name; must start with "tt_um_". Make it unique by prepending your github username
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
@@ -128,4 +128,4 @@ documentation:
   discord:      algofoogle#4505      # Your discord handle, used for communication and automatically assigning tapeout role after a submission
   doc_link:     https://github.com/algofoogle/tt03p5-solo-squash      # URL to longer form documentation, eg the README.md in your repository
   clock_hz:     25000000       # Clock frequency in Hz (if required)
-  picture:      src/solo_squash/doc/verilator.png      # relative path to a picture in your repository
+  picture:      doc/verilator.png      # relative path to a picture in your repository

@@ -9,9 +9,9 @@ module tt_um_algofoogle_solo_squash(
     output  wire [7:0]  uo_out,
 
     // 8 bidirectional user IOs:
-    output  wire [7:0]  uio_in,     // Input path.
+    input   wire [7:0]  uio_in,     // Input path.
     output  wire [7:0]  uio_out,    // Output path.
-    output  wire [7:0]  uio_oe,      // Enable path (active high: 0=input, 1=output)
+    output  wire [7:0]  uio_oe,     // Enable path (active high: 0=input, 1=output)
 
     // Control:
     input   wire        ena,        // Can be ignored for now.
@@ -21,6 +21,8 @@ module tt_um_algofoogle_solo_squash(
 
     // Hard-wire bidir IOs to just be inputs:
     assign uio_oe = 8'b0;
+    // Unused, but avoids some synthesis warnings:
+    assign uio_out = 8'b0;
 
     // For test purposes, use unused outputs to loop back a couple of things:
     assign uo_out[6] = clk;

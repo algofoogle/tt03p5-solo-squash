@@ -33,13 +33,15 @@ documentation:
 
     A 25MHz clock drives a simple 640x480 VGA generator, and in turn generates a simple "game"
     that displays a bouncing ball within a playfield of 3 walls, with the 4th side open except
-    for a lone paddle that you as the player control.
+    for a lone paddle that you as the player control. Pong? What's that?
+    Sounds too new-fangled for me!
 
 
     ### What's the objective of the game?
 
-    Keep the ball bouncing in the playfield for as long as you can. It's harder than it sounds,
-    sometimes! There is no score, and no other objective... just minutes of mild thrills.
+    Keep the ball bouncing in the playfield for as long as you can. Sometimes it's harder than it sounds!
+    There is no score, and no other objective. It's educational, and offers mild thrills,
+    just like Edna.
 
     One button moves the paddle up, the other down, at a constant rate.
 
@@ -52,7 +54,7 @@ documentation:
 
     ### How does the design work?
 
-    Tones produced on `speaker` are derived from divisions of the horizontal and vertical scanning.
+    Tones produced on `speaker` are derived from divisions (bits) of the vertical scan register.
 
     Rendering of the walls, ball, and paddle are done using registers (more-so than combo logic)
     that turn the VGA red/green channels on and off at the right times as the VGA beam marches on.
@@ -67,9 +69,9 @@ documentation:
 # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
   how_to_test:  |
     Assuming ~3.3V outputs from the ASIC, put a 270&ohm; resistor on each of `red`, `green`, and
-    `blue` and then connect those to the respective VGA input signals. Voltage-dividing with your
-    VGA display's internal 75&ohm; impedance, this should give you close enough to the 0.7V
-    standard full-brightness signal for each of the colour channels.
+    `blue` and then connect those to the respective VGA input signals.
+    This should give you close enough to the 0.7V standard VGA full-brightness signal for each of the
+    colour channels (i.e. by voltage-dividing with your VGA display's internal 75&ohm; impedance).
 
     Also connect the `hsync` and `vsync` lines to their respective VGA inputs; I feel comfortable
     using an extra 100&ohm; resistor on those, too, just to help in case there are accidental shorts.
@@ -78,12 +80,15 @@ documentation:
     should be enabled by default, meaning the (active-high) signals are **low** by default
     (in the buttons' normally-open state), and get pulled **high** when pressed.
 
-    Optionally connect something for sound to the `speaker` output. For instance, a piezo speaker
-    in series with a 1k&ohm; (or 670&ohm; minimum) current limiting resistor to ground,
-    or an "aux cord" to a line-in amplifier.
+    Optionally connect something for sound to the `speaker` output: e.g. a piezo speaker
+    (or ear-phone speaker) in series with a 1k&ohm; (or 670&ohm; minimum) current limiting resistor
+    to ground... or an "aux cord" to a line-in amplifier.
 
     Supply about a 25MHz clock, and hopefully the design should run immediately as is, producing
-    a VGA display, but you can also assert reset if you want to start at a known state.
+    a VGA display, but you can also assert reset if you want to start at a known state:
+    i.e. VGA scan immediately starting from the top-left pixel of the display, with the first
+    two full lines rendered hopefully yellow (i.e. `red` and `green` channels both asserted,
+    but not `blue`).
 
 
 # A description of what the inputs do:

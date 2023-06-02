@@ -62,7 +62,11 @@ module solo_squash #(
   output  wire  speaker,
   output  wire  red,
   output  wire  green,
-  output  wire  blue
+  output  wire  blue,
+
+  // Debug signals:
+  output  wire  col0,
+  output  wire  row0
 );
   localparam HFULL        = HRES+HF+HS+HB;
   localparam VFULL        = VRES+VF+VS+VB;
@@ -99,6 +103,9 @@ module solo_squash #(
 
   wire hmax     = h == (HFULL-1);       //NOTE: Because we don't care about values ABOVE hmax, we can also look for &{h[9:8], h[5:0]} i.e. 10'b11xx111111 (and in fact, can we compare exactly with this?)
   wire vmax     = v == (VFULL-1);       //NOTE: Because we don't care about values ABOVE vmax, we can also look for &{v[9],   v[3:2]} i.e. 10'b1xxxxx11xx (and in fact, can we compare exactly with this?)
+
+  assign col0 = ~|h;
+  assign row0 = ~|v;
 
   wire wallT    = v <  wallT_LIMIT;
   wire wallB    = v >= wallB_LIMIT;

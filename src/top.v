@@ -32,10 +32,6 @@ module tt_um_algofoogle_solo_squash(
     // Unused, but avoids some synthesis warnings:
     assign uio_out = 8'b0;
 
-    // For test purposes, use unused outputs to loop back a couple of things:
-    assign uo_out[6] = clk;
-    assign uo_out[7] = ~ui_in[4]; // Unused input, just inverted for testing.
-
     // Input metastability avoidance. Do we really need this, for this design?
     // I'm playing it extra safe :)
     wire pause_n, new_game_n, down_key_n, up_key_n;
@@ -60,7 +56,10 @@ module tt_um_algofoogle_solo_squash(
         .blue       (b),
         .hsync      (uo_out[3]),
         .vsync      (uo_out[4]),
-        .speaker    (uo_out[5])
+        .speaker    (uo_out[5]),
+        // Debug outputs:
+        .col0       (uo_out[6]),
+        .row0       (uo_out[7])
     );
 
 endmodule

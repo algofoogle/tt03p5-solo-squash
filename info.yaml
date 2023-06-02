@@ -7,6 +7,7 @@ project:
   # Source files must be in ./src and you must list each source file separately
   source_files:
     - top.v                                 # This is my wrapper to connect the TT interface with my design.
+    - lzc_fast.v                            # This is just an experiment included in the design; a leading zero counter with 24-bit input.
     - solo_squash.v                         # My main design HDL is in a git submodule of the src/ dir.
   top_module: tt_um_algofoogle_solo_squash  # Top module name; must start with "tt_um_". Make it unique by prepending your github username
 
@@ -90,6 +91,21 @@ documentation:
     two full lines rendered hopefully yellow (i.e. `red` and `green` channels both asserted,
     but not `blue`).
 
+    ### Bonus: Leading Zero Counter experiment
+
+    There is an extra feature in this design which is just an experiment: I've included a
+    leading zero counter with a 24-bit input that comes from the concatention of these internal
+    signals of the solo_squash module: `{offset[3:0],v,h}`, i.e. this pattern of 24 bits
+    is fed into the LZC:
+
+    `oooo'vvvv'vvvv'vvhh'hhhh'hhhh` -- Where the upper 4 bits are effectively a frame counter,
+    the middle 10 "v" bits are the current line number, and the lower 10 "h" bits are the
+    current horizontal pixel.
+
+    This packed value then has its total number of leading zeroes counted, and output on the
+    lower 5 bits of the bidirectional port (known internally `uio_out[4:0]`), i.e. a number
+    from 0 to 24. The next bit (`uio_out[5]`) is 1 if the zero count is 24 (i.e. all zeroes).
+
 
 # A description of what the inputs do:
   inputs:               
@@ -113,12 +129,12 @@ documentation:
     - none        # Unused.
 # A description of what the bidirectional I/O pins do:
   bidirectional:
-    - none        # Unused.
-    - none        # Unused.
-    - none        # Unused.
-    - none        # Unused.
-    - none        # Unused.
-    - none        # Unused.
+    - lzc_out[0]  # Leading zero counter experiment; count bit 0
+    - lzc_out[1]  # Leading zero counter experiment; count bit 1
+    - lzc_out[2]  # Leading zero counter experiment; count bit 2
+    - lzc_out[3]  # Leading zero counter experiment; count bit 3
+    - lzc_out[4]  # Leading zero counter experiment; count bit 4
+    - lzc_all     # Leading zero counter experiment; asserted if lzc_out==24
     - none        # Unused.
     - none        # Unused.
 

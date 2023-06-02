@@ -29,6 +29,9 @@ module tb(
     output wire row0
 );
 
+    localparam PWR = 1'b1;
+    localparam GND = 1'b0;
+
     initial begin
         $dumpfile ("tb.vcd");
         $dumpvars (0, tb);
@@ -53,6 +56,10 @@ module tb(
     assign row0     = uo_out[7];    // Asserted for the whole of the first line.
 
     tt_um_algofoogle_solo_squash tt_um_algofoogle_solo_squash(
+`ifdef USE_POWER_PINS
+        .vccd1  (PWR),
+        .vssd1  (GND),
+`endif
         .ui_in  (ui_in),
         .uo_out (uo_out),
         //.uio_in(),

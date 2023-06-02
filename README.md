@@ -20,6 +20,12 @@ a super simple Pong-like game of bouncing a ball off a paddle and around 3 walls
 For more info about my previous Tiny Tapeout submission attempt, including a discussion of a bit of the
 testing and local build process, see: [`anton1-tt03`](https://github.com/algofoogle/anton1-tt03)
 
+**NOTE:** There is an extra feature in this design which is just an experiment: I've included a
+leading zero counter with a 24-bit input that comes from the concatention of these internal
+signals of the solo_squash module: `{offset[3:0],v,h}` -- It outputs the count
+(from 0 to 24) on `uio_out[4:0]`, and also sets `uio_out[5]` if the count is 24
+(i.e. "all zeroes" signal).
+
 
 ## How it works
 

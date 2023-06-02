@@ -27,10 +27,10 @@ module tt_um_algofoogle_solo_squash(
     //NOTE: MAYBE we should also care about registering hsync, vsync, and maybe speaker,
     // but I want to see what happens in the real ASIC if we don't.
 
-    // Hard-wire bidir IOs to just be inputs:
-    assign uio_oe = 8'b0;
+    // Hard-wire bidir IOs to make upper 2 bits inputs, and the rest outputs (driven by LZC):
+    assign uio_oe = 8'b00_111111;
     // Unused, but avoids some synthesis warnings:
-    assign uio_out = 8'b0;
+    assign uio_out[7:6] = 2'b00;
 
     // Input metastability avoidance. Do we really need this, for this design?
     // I'm playing it extra safe :)
@@ -39,6 +39,14 @@ module tt_um_algofoogle_solo_squash(
     input_sync new_game (.clk(clk), .d(~ui_in[1]), .q(new_game_n));
     input_sync down_key (.clk(clk), .d(~ui_in[2]), .q(down_key_n));
     input_sync up_key   (.clk(clk), .d(~ui_in[3]), .q(up_key_n  ));
+
+    wire [9:0] h;
+    wire [9:0] v;
+    wire [4:0] offset; // This is effectively a frame counter.
+
+    // Just for fun, wire up a leading zero counter (with 24-bit input) that takes a concatenation of
+    // offset's lower 4 bits, then v, then h.
+    lzc24 lzc(.x({offset[3:0], v, h}), .z(uio_out[4:0]), .a(uio_out[5]));
 
     solo_squash game(
         // --- Inputs ---
@@ -59,7 +67,10 @@ module tt_um_algofoogle_solo_squash(
         .speaker    (uo_out[5]),
         // Debug outputs:
         .col0       (uo_out[6]),
-        .row0       (uo_out[7])
+        .row0       (uo_out[7]),
+        .h_out      (h),
+        .v_out      (v),
+        .offset_out (offset)
     );
 
 endmodule

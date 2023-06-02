@@ -66,7 +66,12 @@ module solo_squash #(
 
   // Debug signals:
   output  wire  col0,
-  output  wire  row0
+  output  wire  row0,
+  output  wire [9:0] h_out,
+  output  wire [9:0] v_out,
+  output  wire [4:0] offset_out
+
+
 );
   localparam HFULL        = HRES+HF+HS+HB;
   localparam VFULL        = VRES+VF+VS+VB;
@@ -79,6 +84,10 @@ module solo_squash #(
   localparam wallR_LIMIT  = HRES -wallWidth;
   localparam wallT_LIMIT  =       wallWidth;
   localparam wallB_LIMIT  = VRES -wallWidth;
+
+  assign h_out = h;
+  assign v_out = v;
+  assign offset_out = offset;
 
 `ifdef CARAVEL_IO_OEB //NOTE: Probably won't be used anymore; handled by solo_squash_caravel adapter instead.
 `ifdef RESET_AL

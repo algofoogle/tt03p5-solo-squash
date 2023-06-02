@@ -103,9 +103,9 @@ documentation:
     - none        # Unused.
 # A description of what the outputs do:
   outputs:
-    - red         # VGA signal: red
-    - green       # VGA signal: green
     - blue        # VGA signal: blue
+    - green       # VGA signal: green
+    - red         # VGA signal: red
     - hsync       # VGA signal: horizontal sync pulse
     - vsync       # VGA signal: vertical sync pulse
     - speaker     # Speaker tone

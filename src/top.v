@@ -19,6 +19,14 @@ module tt_um_algofoogle_solo_squash(
     input   wire        rst_n       // Active low reset
 );
 
+    // Register the RGB outputs for stability:
+    wire r, g, b;
+    reg qr, qg, qb;
+    always @(posedge clk) {qr,qg,qb} <= {r,g,b};
+    assign uo_out[2:0] = {qr,qg,qb};
+    //NOTE: MAYBE we should also care about registering hsync, vsync, and maybe speaker,
+    // but I want to see what happens in the real ASIC if we don't.
+
     // Hard-wire bidir IOs to just be inputs:
     assign uio_oe = 8'b0;
     // Unused, but avoids some synthesis warnings:
@@ -28,23 +36,42 @@ module tt_um_algofoogle_solo_squash(
     assign uo_out[6] = clk;
     assign uo_out[7] = ~ui_in[4]; // Unused input, just inverted for testing.
 
+    // Input metastability avoidance. Do we really need this, for this design?
+    // I'm playing it extra safe :)
+    wire pause_n, new_game_n, down_key_n, up_key_n;
+    input_sync pause    (.clk(clk), .d(~ui_in[0]), .q(pause_n   ));
+    input_sync new_game (.clk(clk), .d(~ui_in[1]), .q(new_game_n));
+    input_sync down_key (.clk(clk), .d(~ui_in[2]), .q(down_key_n));
+    input_sync up_key   (.clk(clk), .d(~ui_in[3]), .q(up_key_n  ));
+
     solo_squash game(
         // --- Inputs ---
         .clk        (clk),
         .reset      (~rst_n),       // Active HIGH reset needed here.
         // Active-low control inputs (but pulled low by the chip BY DEFAULT when not pressed, so inverted here):
-        .pause_n    (~ui_in[0]),
-        .new_game_n (~ui_in[1]),
-        .down_key_n (~ui_in[2]),
-        .up_key_n   (~ui_in[3]),
+        .pause_n    (pause_n),
+        .new_game_n (new_game_n),
+        .down_key_n (down_key_n),
+        .up_key_n   (up_key_n),
 
         // --- Outputs ---
-        .red        (uo_out[0]),
-        .green      (uo_out[1]),
-        .blue       (uo_out[2]),
+        .red        (r),
+        .green      (g),
+        .blue       (b),
         .hsync      (uo_out[3]),
         .vsync      (uo_out[4]),
         .speaker    (uo_out[5])
     );
 
+endmodule
+
+// Basic double DFF metastability avoidance:
+module input_sync(
+    input wire clk,
+    input wire d,
+    output wire q
+);
+    reg dff1, dff2;
+    assign q = dff2;
+    always @(posedge clk) {dff2,dff1} <= {dff1,d};
 endmodule

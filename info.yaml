@@ -91,9 +91,11 @@ documentation:
     two full lines rendered hopefully yellow (i.e. `red` and `green` channels both asserted,
     but not `blue`).
 
-    Note also, for other testing: The upper 2 bits of the bidirectional IO will output the
-    unregistered red and green signals; and the upper 2 bits of the dedicated output pins will
-    output the `col==0` and `row==0` signals.
+    Note also, for other testing: The upper 2 bits of the dedicated output pins will
+    output the `col==0` and `row==0` signals; and the upper 2 bits of the bidirectional IO
+    are called `debug1` (bit 6) and `debug2` (bit 7). If the input `extra_sel` is low,
+    they will output the *unregistered* green and red signals respectively.
+    Otherwise, they will output the 'visible' and blue signals respectively.
 
     ### Bonus: Leading Zero Counter experiment
 
@@ -129,8 +131,8 @@ documentation:
     - hsync       # VGA signal: horizontal sync pulse
     - vsync       # VGA signal: vertical sync pulse
     - speaker     # Speaker tone
-    - col0        # Unused.
-    - row0        # Unused.
+    - col0        # Asserted whenever VGA horizontal scan is at pixel 0
+    - row0        # Asserted while the VGA vertical scan is at line 0
 # A description of what the bidirectional I/O pins do:
   bidirectional:
     - lzc_out[0]  # Leading zero counter experiment; count bit 0
@@ -139,8 +141,8 @@ documentation:
     - lzc_out[3]  # Leading zero counter experiment; count bit 3
     - lzc_out[4]  # Leading zero counter experiment; count bit 4
     - lzc_all     # Leading zero counter experiment; asserted if lzc_out==24
-    - debug1      # UNregistered (direct) green signal.
-    - debug2      # UNregistered (direct) red signal.
+    - debug1      # If extra_sel==0: UNregistered (direct) green signal; else: 'visible' signal.
+    - debug2      # if extra_sel==0: UNregistered (direct) red signal; else: UNregistered blue signal.
 
 # The following fields are optional
   tag:          vga, game      # comma separated list of tags: test encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,

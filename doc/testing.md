@@ -66,3 +66,80 @@ Additionally, while held in reset, the design should assert the following output
 *   `bidir[7:0]`: `11111000`
 
 
+## Testing the ASIC using tt3p5 MicroPython SDK
+
+> This is based on: https://github.com/TinyTapeout/tt3p5-demo-fw/blob/main/upython/README.md
+
+Below is my attempt at a MicroPython script that should work with the TT03p5 to test this design.
+
+**This is not finished yet!**
+
+```python
+from machine import Pin
+from ttdemoboard.demoboard import DemoBoard, RPMode
+
+def print_board_outputs(b:DemoBoard, expect_out:int=None, expect_bidir:int=None):
+    print(f'uo_out={b.output_byte:08b} bidir={b.bidir_byte:08b}', end='')
+    if expect_out is None:
+        print()
+    else:
+        print(f'; expected uo_out={expect_out:08b} bidir={expect_bidir:08b}')
+
+# Get a handle to the base board. ASICONBOARD configures our
+# RP2040 GPIOs for proper cooperation with an attached TT chip:
+board = DemoBoard(RPMode.ASICONBOARD)
+
+# Enable my tt03p5-solo-squash design:
+board.shuttle.tt_um_algofoogle_solo_squash.enable()
+print(f'Project {board.shuttle.enabled.name} running ({board.shuttle.enabled.repo})')
+
+# Ensure we are *reading* from all of the ASIC's bidir pins:
+for pin in board.bidirs:
+    pin.mode = Pin.IN
+
+# Start with project clock low, and reset NOT asserted:
+board.project_clk(0)
+board.project_nrst(1)
+
+# Print initial state of all outputs:
+print_board_outputs(board)
+
+# Assert reset, toggle the clock 3 times, then release reset:
+board.project_nrst(0)
+for i in range(3):
+    board.project_clk(1); board.project_clk(0)
+board.project_nrst(1)
+
+# Now show the state of all outputs again:
+print_board_outputs(board, expect_out=0b11011110, expect_bidir=0b11111000)
+
+"""
+    TBC!
+"""
+
+# # play with the inputs
+# board.in0(1)
+# board.in7(1)
+# # or as a byte
+# board.input_byte = 0xAA
+
+# # start automatic project clocking
+# board.clockProjectPWM(2e6) # clocking projects @ 2MHz
+
+# # observe some outputs
+# if board.out2():
+#     print("Aha!")
+
+# print(f'Output is now {board.output_byte}')
+
+# # play with bidir pins (careful)
+# board.uio2.mode = Pin.OUT
+# board.uio2(1) # set high
+
+# # if you changed modes on pins, like bidir, and want 
+# # to switch project, reset them to IN or just
+# board.pins.reset() 
+# # before you switch projects
+
+```
+

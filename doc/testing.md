@@ -92,4 +92,3 @@ mode = ASIC_ON_BOARD
 
 Then we use the [`test.py`](./test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
 
-**This is not finished yet!**

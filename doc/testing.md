@@ -1,5 +1,9 @@
 # How to test tt03p5-solo-squash
 
+*   [Testing by Verilator simulation](#testing-by-verilator-simulation)
+*   [Testing the ASIC](#testing-the-asic)
+*   [Testing the ASIC using tt3p5 MicroPython SDK](#testing-the-asic-using-tt3p5-micropython-sdk)
+
 ## Testing by Verilator simulation
 
 For more info on this, see [Visual simulation with Verilator](https://github.com/algofoogle/solo_squash#visual-simulation-with-verilator).
@@ -90,5 +94,5 @@ start_in_reset = no
 mode = ASIC_ON_BOARD
 ```
 
-Then we use the [`test.py`](./test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
+**THEN** we use the [`test.py`](./test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
 

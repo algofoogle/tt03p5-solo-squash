@@ -18,7 +18,7 @@ If you want, see [pin descriptions](https://github.com/algofoogle/tt03p5-solo-sq
 Here are the most essential things that you'll need to know for bring-up and testing:
 
 1.  This design is free-running. You should be able to plug and play. Provide a clock near 25.175MHz. Anything from 21MHz to 30MHz might work.
-2.  `ui_in[4:0]` should be pulled low by default. They are active-high inputs for game interaction.
+2.  `ui_in[4:0]` should be pulled low by default. They are active-high inputs for game interaction. `ui_in[7:5]` are unused.
 3.  Initially, leave all the "bidirectional" pins disconnected -- they are set to always  be outputs in this design.
 4.  Connect these uo_outs to a VGA driver (e.g. VGA DAC PMOD):
     *   `uo_out[0]` => Blue
@@ -40,7 +40,7 @@ NOTE: It's not necessary to assert reset, but without it you might find that the
 2.  Assuming all `ui_in` inputs are *weakly pulled low* by default, you can assert a high signal on `ui_in[2]` ("down") or `ui_in[3]` ("up") to cause the paddle to move. Use pushbuttons, or just switches will do.
 3.  Holding a high on `ui_in[0]` ("pause") will freeze all animation, and holding a high on `ui_in[1]` ("new_game") will revert the game to its starting state while the background scrolling animation continues.
 
-NOTE: Debouncing is not required on these inputs; they have 2xDFF sync internally.
+NOTE: Debouncing is not required on these inputs; they have 2xDFF sync internally, and their sampling is only momentary (once each frame) rather than 'counted'.
 
 ### Advanced testing:
 
@@ -65,7 +65,7 @@ If you don't get a display at all, check:
 *   Do the *un*registered outputs (`bidir[7:6]`) produce a video image?
 *   Is there any activity on `bidir[5:0]`? These are part of a 'leading zero counter' test that behaves like a *mostly* logarithmic counter that rolls over every 16 frames.
 
-Additionally, while held in reset, the design should assert the following outputs:
+Additionally, while clocking the design held in reset, it should assert the following outputs:
 *   `uo_out[7:0]`: `11011110`
 *   `bidir[7:0]`: `11111000`
 
@@ -75,6 +75,8 @@ Additionally, while held in reset, the design should assert the following output
 > This is based on: https://github.com/TinyTapeout/tt3p5-demo-fw/blob/main/upython/README.md and **NOTE** that this code was written to work with [commit 02f897e](https://github.com/TinyTapeout/tt3p5-demo-fw/commit/02f897eb6741680895554e88dd276d9f4f954e9d) of that repo/library, after it had been refactored a bit.
 
 Below is my attempt at a scripted test that should work with TT03p5 to test this design.
+
+### `config.ini`
 
 First, we use this `config.ini` file to tell the test library what our defaults and start-up conditions are for this tt03p5-solo-squash (`tt_um_algofoogle_solo_squash`) design:
 
@@ -94,5 +96,49 @@ start_in_reset = no
 mode = ASIC_ON_BOARD
 ```
 
-**THEN** we use the [`test.py`](./test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
+### `test.py`
 
+With the above `config.ini` we use the [`test.py`](./test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
+
+
+### How the tests work
+
+Basic things to know:
+
+*   Comment out (or override) the tests you want and their config in lines 16..23.
+*   The first time you run the test, it is a good idea to leave `PRINT_VSYNC_ERRORS` and `PRINT_LZC_ERRORS` both disabled (i.e. set to `False`) because these *could* spew up to 840,000 error lines. Instead, run the test first with these disabled to just get the stats, then decide if you want extra detail.
+*   `.` outputs are 'good' progress, while `!` outputs are 'bad' progress (i.e. at least one error detected since the last batch of cycles tested).
+*   Helper functions appear at lines 25..90
+*   Main test code starts at line 92, and works as follows...
+
+Test operation:
+
+1.  Create `tt` DemoBoard instance (an interface to the ASIC board, as configured by `config.ini`).
+2.  Select `tt_um_algofoogle_solo_squash` design.
+3.  Configure bidir pins as ASIC outputs (RP2040 inputs).
+4.  Set up ASIC inputs to all be low (inactive).
+5.  Print 'Pre-reset state' of all ASIC outputs.
+6.  Reset the ASIC by asserting `nrst` during 3 clock pulses.
+7.  Print 'Post-reset state'.
+8.  If `BASIC_TEST` is enabled, it checks some basic outputs for 2 video lines as follows, after the above reset...
+    1.  Manually cycle the clock 800 times (i.e. `x`, pixels) for each of 2 lines (`y`), and test outputs at each clock cycle...
+    2.  Determine what the current RGB output should be, and also what it *will* be on the next iteration (because it is **registered**, hence delayed by 1 clock).
+    3.  Determine what all other `uo_out` outputs *should* be.
+    4.  If actual outputs match expected outputs, print `.` characters for progress.
+    5.  If there's a mismatch, print actual and expected bitfields along with `[x,y]` pixel position.
+    6.  Count each mismatch as 1 error. At the end, this is printed as a final error rate out of 1600 total clock cycles.
+    7.  NOTE: While RGB outs are registered, the other `uo_out` signals are not.
+9.  If `FRAME_TEST` is enabled, it checks expected total contents of 1 full video frame, as follows...
+    1.  Reset the design.
+    2.  Manually cycle the clock 800 times for each of 525 lines.
+    3.  Per each cycle, gradually build a histogram of each of the 8 possible pixel colours.
+    4.  Try to detect the position of the paddle and the ball by looking for their respective colours within valid screen regions.
+    5.  Check that VSYNC is asserted *iff* it should be.
+    6.  Check the LZC circuit's output; this is an experiment, not part of the video/game design.
+    7.  Mismatches (if any) in steps 5 and 6 are counted in respective counters.
+    8.  If `PRINT_VSYNC_ERRORS` or `PRINT_LZC_ERRORS` are `True`, a respective VSYNC or LZC mismatch prints detailed output (**WARNING:** This could end up spewing 840,000 lines in the worst case!)
+    9.  So long as there are no errors, you should see a stream of `.` characters indicating progress. Otherwise, pockets of detected error(s) will print a `!` character.
+    10. At the end:
+        1.  Print VSYNC/LZC error counts (if any).
+        2.  If the ball and/or paddle were detected, print their position.
+        3.  Print a table showing the colour stats: RGB bitfield; colour name; actual count; expected count.

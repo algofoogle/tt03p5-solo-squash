@@ -1,6 +1,5 @@
-from machine import Pin
-import ttboard.util.time as time  # for time.sleep_ms()
-from ttboard.mode import RPMode
+from ttboard.pins.upython import Pin # rather than from machine, allows dev on desktop
+import ttboard.util.time as time     # for time.sleep_ms()
 from ttboard.demoboard import DemoBoard
 
 # ========= Config =========
@@ -21,6 +20,8 @@ BASIC_TEST  = True
 FRAME_TEST  = True
 # PRINT_VSYNC_ERRORS = True
 # PRINT_LZC_ERRORS = True
+
+OUTPUT_TIMING = False
 
 # ========= Helper functions =========
 
@@ -45,7 +46,8 @@ def print_tt_outputs(tt:DemoBoard, expect_out:int=None, expect_bidir:int=None, p
 # erroneous batch. If a progress character is NOT due, just return whatever 'ok' is currently.
 def print_progress(x:int, y:int=0, ok:bool=True):
     if x&0b1111 == 0:
-        print('.' if ok else '!', end='', flush=True)
+        # extra keyword arguments given print('.' if ok else '!', end='', flush=True)
+        print('.' if ok else '!', end='')
         return True
     else:
         return ok
@@ -54,7 +56,7 @@ def print_progress(x:int, y:int=0, ok:bool=True):
 # Print basic header for the next test, and (optionally) how long
 # until it starts (given PAUSE_DELAY):
 def announce(test_header:str):
-    print(f'\n{str}')
+    print(f'\n{test_header}')
     if PAUSE_DELAY > 0:
         print(f'(Will continue in {PAUSE_DELAY}ms...)')
         time.sleep_ms(PAUSE_DELAY)
@@ -62,19 +64,19 @@ def announce(test_header:str):
 # pulse_clock():
 # Quick helper to pulse the clock and optionally wait out configured extra delay.
 def pulse_clock(tt:DemoBoard):
-    tt.clockProjectOnce()
+    tt.clock_project_once()
     if EXTRA_DELAY > 0:
         time.sleep_ms(EXTRA_DELAY)
 
 # do_reset():
 # Go through a reset sequence by asserting reset, pulsing clock 3 times,
 # then releasing reset again:
-def do_reset(tt):
+def do_reset(tt:DemoBoard):
     print('Resetting design...')
-    tt.resetProject(True)
-    for i in range(3):
-        tt.clockProjectOnce()
-    tt.resetProject(False)
+    tt.reset_project(True)
+    for _i in range(3):
+        tt.clock_project_once()
+    tt.reset_project(False)
 
 # calc_lzc():
 # Given h (x) position, v (y) position, and frame number,
@@ -112,7 +114,7 @@ for pin in tt.bidirs:
 
 # Start with project clock low, and reset NOT asserted:
 tt.project_clk(0)
-tt.resetProject(False)
+tt.reset_project(False)
 
 # By default all inputs to the ASIC should be low:
 tt.input_byte = 0
@@ -138,6 +140,8 @@ if BASIC_TEST:
     for y in range(2):
         print(f'Line {y}:')
         bulk_ok = True  # 'bulk' because it keeps track of ANY error within a progress update batch.
+        
+        t_start = time.ticks_us()
         for x in range(800):
             # Make sure outputs match what we expect...
             color = next_color
@@ -154,7 +158,12 @@ if BASIC_TEST:
                 bulk_ok = False
             bulk_ok = print_progress(x, ok=bulk_ok)
             pulse_clock(tt)
-        print()
+            
+        t_end = time.ticks_us()
+        if OUTPUT_TIMING:
+            print(f'{int( (t_end - t_start)/1000 )}ms')
+        else:
+            print()
     print(f'\nBASIC_TEST done. Error rate: {error_count}/1600\n')
 
 
@@ -203,6 +212,7 @@ if FRAME_TEST:
     for y in range(rows):
         print(f'Line {y}:')
         bulk_ok = True
+        t_start = time.ticks_us()
         for x in range(cols):
             # Increment the count in the bin of the current pixel colour:
             color = tt.output_byte & 0b111
@@ -233,7 +243,11 @@ if FRAME_TEST:
                     print_tt_outputs(tt, expect_out, prefix=f'[{x},{y}]   LZC error:')
             bulk_ok = print_progress(x, y, ok=bulk_ok)
             pulse_clock(tt)
-        print()
+        t_end = time.ticks_us()
+        if OUTPUT_TIMING:
+            print(f'{int( (t_end - t_start)/1000 )}ms')
+        else:
+            print()
 
     print()
     if vsync_errors==0:

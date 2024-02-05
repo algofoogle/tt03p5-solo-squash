@@ -1,56 +1,70 @@
 # How to test tt03p5-solo-squash
 
-*   [Testing by Verilator simulation](#testing-by-verilator-simulation)
 *   [Testing the ASIC](#testing-the-asic)
 *   [Testing the ASIC using tt3p5 MicroPython SDK](#testing-the-asic-using-tt3p5-micropython-sdk)
-
-## Testing by Verilator simulation
-
-For more info on this, see [Visual simulation with Verilator](https://github.com/algofoogle/solo_squash#visual-simulation-with-verilator).
-
+*   [Testing by Verilator simulation](#testing-by-verilator-simulation)
 
 ## Testing the ASIC
 
 The ASIC was recently manufactured, and the Tiny Tapeout team will be doing a bring-up very soon.
 
-If you want, see [pin descriptions](https://github.com/algofoogle/tt03p5-solo-squash/blob/163eb866e6f9eb7d51b215f075e0b5d8e652645a/info.yaml#L116-L145).
+### TL;DR: Quick hook-up and demo
 
-Here are the most essential things that you'll need to know for bring-up and testing:
+This will allow you to demo the essential features (VGA out, sound out, and button inputs) and actually play the game:
 
-1.  This design is free-running. You should be able to plug and play. Provide a clock near 25.175MHz. Anything from 21MHz to 30MHz might work.
-2.  `ui_in[4:0]` should be pulled low by default. They are active-high inputs for game interaction. `ui_in[7:5]` are unused.
-3.  Initially, leave all the "bidirectional" pins disconnected -- they are set to always  be outputs in this design.
-4.  Connect these uo_outs to a VGA driver (e.g. VGA DAC PMOD):
-    *   `uo_out[0]` => Blue
-    *   `uo_out[1]` => Green
-    *   `uo_out[2]` => Red
-    *   `uo_out[3]` => HSYNC
-    *   `uo_out[4]` => VSYNC
-    *   NOTE: This is simple 3-bit colour (i.e. RGB111). If you have an RGB222 driver, you could connect each *single* colour channel output to *both* bits of each colour channel input.
+![Schematic showing quick hook-up of this design for demo purposes](./test-demo-hookup.png)
 
-That's enough to get started. From power-on, a display should be visible with a 'paddle' at the left screen edge, 3 'walls' on the other screen edges, a bouncing ball (or one that appears at least within a few seconds), and a scrolling patterned blue background:
+Quick notes about what you see above:
+
+*   **Clock**:
+    *   25.175MHz ideal. Anything from 21MHz to 30MHz should work.
+*   **VGA out**:
+    *   5 simple signals: HSYNC, VSYNC, and 1 digital output each for Red, Green, Blue channels.
+    *   If using a PMOD (VGA DAC/amp) with (say) 2 bits per channel, you can double-up each of R, G, B for full contrast.
+    *   If wiring *directly* to your display, I suggest an in-line 270&ohm; resistor for each signal to get correct levels, but beware: This could source ~10mA per IO, which might be well over the [Caravel limit](https://skywater-pdk.readthedocs.io/en/main/contents/libraries/sky130_fd_io/docs/user_guide.html#i-o1-common-features).
+*   **Button inputs**:
+    *   Active-high, hence weakly pulled low otherwise.
+    *   Most important are `UP` and `DOWN`. Others are pulled low as non-essential, but they can be active-high buttons too.
+    *   Debouncing is not required on inputs; they have 2xDFF sync internally, and they are not edge-sensitive.
+*   **Speaker**:
+    *   Choose: (a) tiny speaker/passive-piezo driven directly at low volume; OR (b) line-out for use with any regular audio amplifier, e.g. PC line-in or portable speaker 'aux' input.
+*   Bidirectional pins are not shown; they're all configured as outputs but their functions are not overly important for demo.
+
+That's enough to get started. From power-on, a display should be visible resembling the screenshot below.
+
+> [!TIP]
+> It's not necessary to assert reset, but without it you might find that the paddle 'overflows' and fills the full height of the left edge.
+
+> [!NOTE]
+> Not working? See [Diagnosing issues](#diagnosing-issues).
 
 <img src="./new-game-screen.png" width="640" height="480" alt="Initial game screen" />
 
-NOTE: It's not necessary to assert reset, but without it you might find that the paddle 'overflows' and fills the full height of the left edge.
 
-### Additional stuff to test:
+These are the main features you should observe:
 
-1.  There is a speaker output on `uo_out[5]`. It plays two different tones. Try connecting a speaker (or piezo) and 1k&ohm; resistor in series to GND. Optionally try amplifying the output.
-2.  Assuming all `ui_in` inputs are *weakly pulled low* by default, you can assert a high signal on `ui_in[2]` ("down") or `ui_in[3]` ("up") to cause the paddle to move. Use pushbuttons, or just switches will do.
-3.  Holding a high on `ui_in[0]` ("pause") will freeze all animation, and holding a high on `ui_in[1]` ("new_game") will revert the game to its starting state while the background scrolling animation continues.
+*   3 walls: top, right, and bottom of screen.
+*   Red paddle. Moved up and down by buttons. This is your 'player'.
+*   Green ball which moves constantly and bounces off the objects listed above.
+*   Scrolling patterned blue background. Just decoration.
+*   When the ball touches anything it should play a tone via `uo_out5`.
+*   If you miss the ball and it goes offscreen, you'll hear a longer tone, and then the ball should return to play after a couple of seconds.
 
-NOTE: Debouncing is not required on these inputs; they have 2xDFF sync internally, and their sampling is only momentary (once each frame) rather than 'counted'.
+If you want, see [pin descriptions](https://github.com/algofoogle/tt03p5-solo-squash/blob/163eb866e6f9eb7d51b215f075e0b5d8e652645a/info.yaml#L116-L145).
 
-### Advanced testing:
 
-1.  `uo_out[6]` is `col0` and is a single pulse (one clock period wide) that occurs every 800 clocks -- i.e. it is asserted during the first pixel of every line.
-2.  `uo_out[7]` is `row0` and is a single pulse (800 clocks wide) that occurs every 420,000 clocks -- i.e. it is asserted during the first line of every frame.
-3.  You could trigger an oscilloscope on the rising edge of `row0` and see the single clock pulse occurring on `col0` at the same time.
-4.  `bidir[6]` is `debug1` and by default it outputs the *un*registered green signal. Likewise, `bidir[7]` (`debug2`) is unregistered red. You could swap out one or both of `uo_out[2:1]` for these and you should see that they change 1 pixel ahead of their respective registered versions.
-5.  If `ui_in[4]` is *high*, then the outputs of `bidir[7]` and `[6]` change to unregistered blue and the "visible" flag respectively.
+### Additional/advanced stuff to test
 
-### Diagnosing issues:
+1.  Holding a high on `ui_in[0]` ("pause") will freeze all animation, and holding a high on `ui_in[1]` ("new_game") will revert the game to its starting state while the background scrolling animation continues.
+2.  `uo_out[6]` is `col0` and is a single pulse (one clock period wide) that occurs every 800 clocks -- i.e. it is asserted during the first pixel of every line.
+3.  `uo_out[7]` is `row0` and is a single pulse (800 clocks wide) that occurs every 420,000 clocks -- i.e. it is asserted during the first line of every frame.
+4.  You could trigger an oscilloscope on the rising edge of `row0` and see the single clock pulse occurring on `col0` at the same time.
+5.  `bidir[5:0]` are the output of a '24-bit leading zero counter' test that behaves like a *mostly* logarithmic down-counter that rolls over every 16 frames. An oscilloscope should show stretching pulses on `bidir[0]`, repeating every ~267ms. `bidir[5]` is the 'input is all 0' flag.
+6.  `bidir[6]` is `debug1` and by default it outputs the *un*registered green signal. Likewise, `bidir[7]` (`debug2`) is unregistered red. You could swap out one or both of `uo_out[2:1]` for these and you should see that they change 1 pixel ahead of their respective registered versions.
+7.  If `ui_in[4]` is *high*, then the outputs of `bidir[7]` and `[6]` change to unregistered blue and the "visible" flag respectively.
+
+
+### Diagnosing issues
 
 If you get a display but the ball is not moving:
 *   `ui_in[1]` (`new_game`) might be high if the background is moving.
@@ -72,6 +86,7 @@ Additionally, while clocking the design held in reset, it should assert the foll
 
 ## Testing the ASIC using tt3p5 MicroPython SDK
 
+> [!TIP]
 > This is based on: https://github.com/TinyTapeout/tt3p5-demo-fw/blob/main/upython/README.md and **NOTE** that this code was written to work with [commit 02f897e](https://github.com/TinyTapeout/tt3p5-demo-fw/commit/02f897eb6741680895554e88dd276d9f4f954e9d) of that repo/library, after it had been refactored a bit.
 
 Below is my attempt at a scripted test that should work with TT03p5 to test this design.
@@ -108,6 +123,7 @@ Basic things to know:
 *   Comment out (or override) the tests you want and their config in lines 16..23.
 *   The first time you run the test, it is a good idea to leave `PRINT_VSYNC_ERRORS` and `PRINT_LZC_ERRORS` both disabled (i.e. set to `False`) because these *could* spew up to 840,000 error lines. Instead, run the test first with these disabled to just get the stats, then decide if you want extra detail.
 *   `.` outputs are 'good' progress, while `!` outputs are 'bad' progress (i.e. at least one error detected since the last batch of cycles tested).
+*   The tests will probably take over 30mins to run, as it tests 1 frame FULLY which is 420,000 clock cycles that the uPython code has to go through. Boosting your RP2040 clock will make the tests run faster.
 *   Helper functions appear at lines 25..90
 *   Main test code starts at line 92, and works as follows...
 
@@ -142,3 +158,9 @@ Test operation:
         1.  Print VSYNC/LZC error counts (if any).
         2.  If the ball and/or paddle were detected, print their position.
         3.  Print a table showing the colour stats: RGB bitfield; colour name; actual count; expected count.
+
+## Testing by Verilator simulation
+
+For more info on this, see [Visual simulation with Verilator](https://github.com/algofoogle/solo_squash#visual-simulation-with-verilator).
+
+

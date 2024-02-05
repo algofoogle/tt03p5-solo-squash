@@ -15,7 +15,7 @@
 
 
 `default_nettype none
-`timescale 1ns / 1ps
+// `timescale 1ns / 1ps
 
 `define BG_PRETTY
 `define BG_ANIMATED

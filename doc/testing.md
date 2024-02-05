@@ -87,7 +87,7 @@ Additionally, while clocking the design held in reset, it should assert the foll
 ## Testing the ASIC using tt3p5 MicroPython SDK
 
 > [!TIP]
-> This is based on: https://github.com/TinyTapeout/tt3p5-demo-fw/blob/main/upython/README.md and **NOTE** that this code was written to work with [commit 02f897e](https://github.com/TinyTapeout/tt3p5-demo-fw/commit/02f897eb6741680895554e88dd276d9f4f954e9d) of that repo/library, after it had been refactored a bit.
+> This is based on: https://github.com/TinyTapeout/tt-micropython-firmware/blob/main/README.md and **NOTE** that this code was written to work with [commit ab28d73](https://github.com/TinyTapeout/tt-micropython-firmware/commit/ab28d73c710e8b6528898d3eaed8d5c95ad42198) of that repo/library, after it had been refactored a bit.
 
 Below is my attempt at a scripted test that should work with TT03p5 to test this design.
 
@@ -109,6 +109,20 @@ start_in_reset = no
 #  - ASIC_MANUAL_INPUTS: basically same as safe, but intent is clear
 #  - STANDALONE: *no* TT ASIC on-board, testing mode, outputs driven, inputs monitored
 mode = ASIC_ON_BOARD
+
+
+[tt_um_algofoogle_solo_squash]
+# project-specific startup config
+# applied every time the project is enabled
+mode = ASIC_ON_BOARD
+
+# start inactive (all ins 0)
+input_byte = 0
+
+# Ensure we are *reading* from all of the ASIC's bidir pins, 
+# so bidirs all inputs:
+bidir_direction = 0
+
 ```
 
 ### `test.py`

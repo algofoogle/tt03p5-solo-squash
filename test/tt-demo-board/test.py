@@ -275,10 +275,10 @@ if FRAME_TEST:
     print(f"{'RGB':5s}{'Color':10s}{'Actual':>10s}{'Expected':>10s}")
     print(f'---------------------------------------------')
     for i in range(len(color_stats)):
-        name = color_stats[0]
-        actual = color_stats[1]
-        expected = color_stats[2]
-        print(f'{i:03b}  {name:10s}{actual:>10d}', end='')
+        name = color_stats[i][0]
+        actual = color_stats[i][1]
+        expected = color_stats[i][2]
+        print(f'{i:03b}  {name:10s}{actual:>10d}  ', end='')
         if expected is None:
             print('-')
             continue
@@ -286,7 +286,7 @@ if FRAME_TEST:
             print(expected, end='')
             fail = actual not in expected
         else:
-            print(f"{expected:>10d}", end='')
+            print(f"{expected:>8d}", end='')
             fail = actual != expected
 
         if fail:
@@ -295,7 +295,7 @@ if FRAME_TEST:
             print()
     print(f'=============================================')
 
-    print('\FRAME_TEST done\n')
+    print('\nFRAME_TEST done\n')
 
 
 """
@@ -304,5 +304,4 @@ if FRAME_TEST:
     -   Is there a good way to write inputs/outputs to a file, e.g. VCD?
     -   Can we make mapped pin names to suit actual pin names for our design?
     -   Test running the design at full speed... IRQs to check expected conditions?
-    -   Print '*' instead of '.' for any batch that contains at least 1 error
 """

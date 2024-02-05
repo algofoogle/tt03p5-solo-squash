@@ -93,7 +93,7 @@ Below is my attempt at a scripted test that should work with TT03p5 to test this
 
 ### `config.ini`
 
-First, we use this `config.ini` file to tell the test library what our defaults and start-up conditions are for this tt03p5-solo-squash (`tt_um_algofoogle_solo_squash`) design:
+First, we use the [`config.ini`](../test/tt-demo-board/config.ini) file to tell the test library what our defaults and start-up conditions are for this tt03p5-solo-squash (`tt_um_algofoogle_solo_squash`) design:
 
 ```ini
 [DEFAULT]
@@ -127,7 +127,7 @@ bidir_direction = 0
 
 ### `test.py`
 
-With the above `config.ini` we use the [`test.py`](./test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
+With the above `config.ini` we use the [`test/tt-demo-board/test.py`](../test/tt-demo-board/test.py) MicroPython script to run the specific series of tests with direct control over IOs (including clock and nrst).
 
 
 ### How the tests work

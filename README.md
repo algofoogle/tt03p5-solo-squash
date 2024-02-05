@@ -70,6 +70,10 @@ side effect of counters rolling over, but that's good enough for me!
 
 See [doc/testing.md](./doc/testing.md) for information on how to test the ASIC, as well as how to run visual simulation with Verilator.
 
+I've also [included a wrapper](./de0nano/) for running it on a DE0-Nano (Altera Cyclone IV) FPGA dev board, but be sure to check the [`tt_um_algofoogle_solo_squash_de0nano.v`](./de0nano/tt_um_algofoogle_solo_squash_de0nano.v) file for details of how I've chosen to wire up the design to the board's IOs. Use it at your own risk, otherwise.
+
+![tt03p5-solo-squash running on an FPGA](./doc/fpga-demo.jpg)
+
 
 # What is Tiny Tapeout?
 
